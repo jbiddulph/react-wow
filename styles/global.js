@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import colors from "../assets/colors";
 
 export const globalStyles = StyleSheet.create({
     titleText: {
@@ -7,12 +8,19 @@ export const globalStyles = StyleSheet.create({
         color: '#333',
     },
     button: {
-        backgroundColor: '#ff6699',
-        tintColor: '#ff0000',
+        backgroundColor: 'yellow',
+        tintColor: '#333',
+        borderRadius: 6,
+        padding: 10,
+        fontSize:34
     },
     paragraph: {
+        paddingLeft: 20,
+        paddingRight: 20,
+        paddingTop: 20,
         marginVertical: 8,
         lineHeight: 20,
+        color: colors.txtWhite
     },
     container: {
         flex: 1,

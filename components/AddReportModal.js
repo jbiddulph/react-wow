@@ -3,14 +3,15 @@ import { View, Text, StyleSheet, Modal } from 'react-native';
 import { MaterialIcons } from "@expo/vector-icons"
 import AddReportForm from "./AddReportForm";
 import * as Location from 'expo-location';
-import { LOCATION } from 'expo-permissions';
+import colors from "../assets/colors";
+import {globalStyles} from "../styles/global";
 
 
 export default function AddReportModal({ addReport }) {
     const [location, setLocation] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
-    const [modalOpen, setModalOpen] = useState(false)
-    state = { location: {} }
+    const [modalOpen, setModalOpen] = useState(false);
+
     useEffect(() => {
         (async () => {
             let { status } = await Location.requestPermissionsAsync();
@@ -36,7 +37,7 @@ export default function AddReportModal({ addReport }) {
         <View>
             <MaterialIcons
                 name='add'
-                size={34}
+                size={32}
                 onPress={() => setModalOpen(true)}
                 style={styles.modalToggle}
             />
@@ -45,10 +46,11 @@ export default function AddReportModal({ addReport }) {
                 <View style={styles.modalContent}>
                     <MaterialIcons
                         name='close'
-                        size={34}
+                        size={32}
                         onPress={() => setModalOpen(false)}
                         style={{ ...styles.modalToggle, ...styles.modalClose }}
                     />
+                    <Text style={globalStyles.paragraph}>Please type what you have found, your location will also be added, you will then be able to add a picture</Text>
                     <AddReportForm longitude={longitude} latitude={latitude} addReport={addReport} />
                 </View>
             </Modal>
@@ -71,11 +73,12 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     modalClose: {
-        marginTop: 20,
-        marginBottom: 0
+        marginTop: 40,
+        marginBottom: 10
     },
     modalContent: {
-        flex: 1
+        flex: 1,
+        backgroundColor: colors.bgMain
     },
     modalText: {
         color: '#999'

@@ -19,7 +19,6 @@ class HomeScreen extends React.Component {
             totalCount: 0,
             readingCount: 0,
             readCount: 0,
-            isAddNewReportVisible: false,
             textInputData: '',
             reports: [],
             reportsNew: [],
@@ -42,36 +41,29 @@ class HomeScreen extends React.Component {
             reportsSaved: reportsArray.filter(report => report.saved),
         })
     }
-    showAddNewReport = () => {
-        this.setState({ isAddNewReportVisible: true })
-    }
-    hideAddNewReport = () => {
-        this.setState({ isAddNewReportVisible: false })
-    }
     openMenu = () => {
         this.navigation.openDrawer()
     }
     addReport = async report => {
         try {
-            const [modalOpen, setModalOpen] = useState(false)
-            const snapshot = await firebase.database().ref('reports')
-                .child(this.state.currentUser.uid).orderByChild('name').equalTo(report).once('value')
-            if (snapshot.exists()) {
-                alert('Unable to add report as already exists')
-            } else {
+            // const [modalOpen, setModalOpen] = useState(false)
+            // const snapshot = await firebase.database().ref('reports')
+            //     .child(this.state.currentUser.uid).orderByChild('name').equalTo(report).once('value')
+            // if (snapshot.exists()) {
+            //     alert('Unable to add report as already exists')
+            // } else {
                 const key = await firebase.database().ref('reports').child
                     (this.state.currentUser.uid).push().key
 
                 const response = await firebase.database().ref('reports').child(this.state.currentUser.uid).child(key)
-                    .set({ name: report, saved: false })
+                    .set(report)
                 this.setState((state, props) => ({
-                    reports: [...state.reports, { name: report, saved: false }],
-                    reportsNew: [...state.reportsNew, { name: report, saved: false }],
-                    isAddNewReportVisible: false
+                    reports: [...state.reports, report],
+                    reportsNew: [...state.reportsNew, report],
                 }), () => { })
                 console.log(this.state.reports)
-                setModalOpen(false)
-            }
+                // setModalOpen(false)
+            //}
         } catch (error) {
             console.log(error)
         }
@@ -126,23 +118,6 @@ class HomeScreen extends React.Component {
                     <AddReportModal addReport={this.addReport} />
                 </View>
                 <View style={styles.container}>
-                    {this.state.isAddNewReportVisible &&
-                        <View style={styles.textInputContainer}>
-                            {/*<AddReportModal {this.props.textInputData} />*/}
-                            <TextInput
-                                onChangeText={(text) => this.setState({ textInputData: text })}
-                                style={styles.textInput}
-                                placeholder="Enter your Report"
-                                placeholderTextColor="grey"
-                            />
-                            <CustomActionButton style={styles.checkMarkButton} onPress={() => this.addReport(this.state.textInputData)}>
-                                <Ionicons name='ios-checkmark' color='white' size={46} />
-                            </CustomActionButton>
-                            <CustomActionButton onPress={this.hideAddNewReport}>
-                                <Ionicons name='ios-close' color='white' size={46} />
-                            </CustomActionButton>
-                        </View>
-                    }
                     <FlatList
                         data={this.state.reports}
                         renderItem={({ item }, index) => this.renderItem(item, index)}
@@ -153,9 +128,6 @@ class HomeScreen extends React.Component {
                             </View>
                         }
                     />
-                    <CustomActionButton position="right" onPress={this.showAddNewReport} style={styles.addNewReportButton}>
-                        <Text style={styles.addNewReportButtonText}>+</Text>
-                    </CustomActionButton>
                 </View>
                 <View style={styles.footer}>
                     <ReportCount title='Total' icon='ios-archive' count={this.state.reports.length} />
@@ -182,10 +154,6 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         fontSize: 24
-    },
-    textInputContainer: {
-        height: 50,
-        flexDirection: 'row'
     },
     textInput: {
         flex: 1,
@@ -238,14 +206,6 @@ const styles = StyleSheet.create({
     markAsReadButtonText: {
         fontWeight: 'bold',
         color: 'white'
-    },
-    addNewReportButton: {
-        backgroundColor: colors.bgPrimary,
-        borderRadius: 25
-    },
-    addNewReportButtonText: {
-        color: 'white',
-        fontSize: 30
     },
     footer: {
         height: 80,

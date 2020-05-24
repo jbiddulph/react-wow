@@ -10,7 +10,7 @@ const colors = {
     logoColor: '#ff6699',
     txtWhite: '#ffffff',
     listItemBg: '#7C7CC7',
-    btnTextColor: '#ff0000'
+    btnTextColor: '#ff6699'
 }
 
 export default colors
