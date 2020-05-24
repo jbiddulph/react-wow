@@ -65,16 +65,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     modalToggle: {
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: '#f2f2f2',
-        padding: 10,
-        borderRadius: 10,
+        paddingRight: 20,
+        color: '#fff',
         alignSelf: 'center'
     },
     modalClose: {
         marginTop: 40,
-        marginBottom: 10
+        marginBottom: 10,
+        color: '#fff'
     },
     modalContent: {
         flex: 1,

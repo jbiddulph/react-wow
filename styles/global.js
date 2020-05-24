@@ -7,19 +7,13 @@ export const globalStyles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#333',
     },
-    button: {
-        backgroundColor: 'yellow',
-        tintColor: '#333',
-        borderRadius: 6,
-        padding: 10,
-        fontSize:34
-    },
     paragraph: {
         paddingLeft: 20,
         paddingRight: 20,
         paddingTop: 20,
         marginVertical: 8,
         lineHeight: 20,
+        fontSize: 16,
         color: colors.txtWhite
     },
     container: {
@@ -35,6 +29,11 @@ export const globalStyles = StyleSheet.create({
         borderRadius: 6,
         marginBottom: 15
     },
+    errorText: {
+        color: '#ff6699',
+        marginBottom: 20,
+        fontWeight: 'bold'
+    }
 })
 
 // export const images = {

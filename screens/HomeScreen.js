@@ -112,11 +112,12 @@ class HomeScreen extends React.Component {
         return (
             <View style={styles.container}>
                 <SafeAreaView />
-                <View style={styles.header}>
-                    <MaterialIcons name='menu' size={32} onPress={this.openMenu} style={styles.menu} />
-                    <Text style={styles.headerTitle}>Watch Out Worthing</Text>
-                    <AddReportModal addReport={this.addReport} />
-                </View>
+                {/*<View style={styles.header}>*/}
+                {/*    <MaterialIcons name='menu' size={32} onPress={this.openMenu} style={styles.menu} />*/}
+                {/*    <Text style={styles.headerTitle}>Watch Out Worthing</Text>*/}
+                {/*    */}
+                {/*</View>*/}
+
                 <View style={styles.container}>
                     <FlatList
                         data={this.state.reports}
@@ -129,11 +130,11 @@ class HomeScreen extends React.Component {
                         }
                     />
                 </View>
-                <View style={styles.footer}>
-                    <ReportCount title='Total' icon='ios-archive' count={this.state.reports.length} />
-                    <ReportCount title='New' icon='ios-document' count={this.state.reportsNew.length} />
-                    <ReportCount title='Saved' icon='ios-heart' count={this.state.reportsSaved.length} />
-                </View>
+                {/*<View style={styles.footer}>*/}
+                {/*    <ReportCount title='Total' icon='ios-archive' count={this.state.reports.length} />*/}
+                {/*    <ReportCount title='New' icon='ios-document' count={this.state.reportsNew.length} />*/}
+                {/*    <ReportCount title='Saved' icon='ios-heart' count={this.state.reportsSaved.length} />*/}
+                {/*</View>*/}
                 <SafeAreaView />
             </View>
         )

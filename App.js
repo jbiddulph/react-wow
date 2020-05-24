@@ -1,5 +1,10 @@
 import React from 'react';
-import { createAppContainer, createSwitchNavigator, createStackNavigator, createDrawerNavigator } from 'react-navigation';
+import {
+    createAppContainer,
+    createSwitchNavigator,
+    createStackNavigator,
+    createDrawerNavigator,
+    createBottomTabNavigator} from 'react-navigation';
 import WelcomeScreen from './screens/AppSwitchNavigator/WelcomeScreen';
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
@@ -11,6 +16,9 @@ import * as firebase from 'firebase/app';
 import { firebaseConfig } from './config/config';
 import LoadingScreen from './screens/AppSwitchNavigator/LoadingScreen';
 import * as Font from 'expo-font';
+import ReportsReadScreen from "./screens/HomeTabNavigator/ReportsReadScreen";
+import ReportsReadingScreen from "./screens/HomeTabNavigator/ReportsReadingScreen";
+import AddReportModal from "./components/AddReportModal";
 
 
 
@@ -50,12 +58,94 @@ const LoginStackNavigator = createStackNavigator({
         }
     })
 
-const AppDrawerNavigator = createDrawerNavigator({
+const HomeTabNavigator = createBottomTabNavigator({
     HomeScreen: {
         screen: HomeScreen,
         navigationOptions: {
+            tabBarLabel: 'Total Reports'
+        }
+    },
+    ReportsReadingScreen: {
+        screen: ReportsReadingScreen,
+        navigationOptions: {
+            tabBarLabel: 'Reports Reading'
+        }
+    },
+    ReportsReadScreen: {
+        screen: ReportsReadScreen,
+        navigationOptions: {
+            tabBarLabel: 'Reports Read'
+        }
+    }
+},{
+    tabBarOptions: {
+        style: {
+            backgroundColor: colors.bgMain
+        },
+        activeTintColor: colors.logoColor,
+        inactiveTintColor: colors.bgTextInput
+    }
+})
+
+HomeTabNavigator.navigationOptions = ({navigation}) => {
+    const {routeName} = navigation.state.routes[navigation.state.index]
+
+    switch(routeName){
+        case 'HomeScreen':
+            return{
+                headerTitle: 'Total Reports'
+            }
+        case 'ReportsReadingScreen':
+            return{
+                headerTitle: 'Reading Reports'
+            }
+        case 'ReportsReadScreen':
+            return{
+                headerTitle: 'Read Reports'
+            }
+        default:
+            return{
+                headerTitle: 'Watch Out Worthing'
+            }
+    }
+}
+
+const HomeStackNavigator = createStackNavigator({
+    HomeTabNavigator: {
+        screen: HomeTabNavigator,
+        navigationOptions: ({navigation}) => {
+            return {
+                headerLeft: (<Ionicons
+                    name="ios-menu"
+                    size={30}
+                    color={colors.logoColor}
+                    onPress={()=>navigation.openDrawer()}
+                    style={{marginLeft: 20}}
+                    />
+                ),
+                headerRight: (
+                    <AddReportModal
+                        addReport={this.addReport}
+                    />
+                )
+            }
+        }
+    }
+},{
+    defaultNavigationOptions: {
+        headerStyle: {
+            backgroundColor: colors.bgMain
+        },
+        headerTintColor: colors.txtWhite
+    }
+})
+
+const AppDrawerNavigator = createDrawerNavigator({
+    HomeStackNavigator: {
+        screen: HomeStackNavigator,
+        navigationOptions: {
             title: 'Home',
-            drawerIcon: () => <Ionicons name="ios-home" size={24} />
+            drawerIcon: () => <Ionicons name="ios-home" size={24}/>
         }
     },
     SettingsScreen: {
@@ -68,6 +158,9 @@ const AppDrawerNavigator = createDrawerNavigator({
 }, {
         contentComponent: CustomDrawerComponent
     })
+
+
+
 
 const AppSwitchNavigator = createSwitchNavigator({
     LoadingScreen,
