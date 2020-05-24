@@ -1,19 +1,80 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { createAppContainer, createSwitchNavigator, createStackNavigator, createDrawerNavigator } from 'react-navigation';
+import WelcomeScreen from './screens/AppSwitchNavigator/WelcomeScreen';
+import HomeScreen from './screens/HomeScreen';
+import LoginScreen from './screens/LoginScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import { Ionicons } from '@expo/vector-icons';
+import CustomDrawerComponent from "./screens/DrawerNavigator/CustomDrawerComponent";
+import colors from "./assets/colors";
+import * as firebase from 'firebase/app';
+import { firebaseConfig } from './config/config';
+import LoadingScreen from './screens/AppSwitchNavigator/LoadingScreen';
+import * as Font from 'expo-font';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-    </View>
-  );
+
+
+class App extends React.Component {
+    
+    constructor() {
+        super();
+        this.initializeFirebase()
+    }
+    initializeFirebase = () => {
+        firebase.initializeApp(firebaseConfig)
+    }
+    render() {
+        return (
+            <AppContainer />
+        )
+    }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const LoginStackNavigator = createStackNavigator({
+    WelcomeScreen: {
+        screen: WelcomeScreen,
+        navigationOptions: {
+            header: null
+        }
+    },
+    LoginScreen: {
+        screen: LoginScreen,
+        navigationOptions: {}
+    }
+}, {
+        mode: 'modal',
+        defaultNavigationOptions: {
+            headerStyle: {
+                backgroundColor: colors.bgMain
+            }
+        }
+    })
+
+const AppDrawerNavigator = createDrawerNavigator({
+    HomeScreen: {
+        screen: HomeScreen,
+        navigationOptions: {
+            title: 'Home',
+            drawerIcon: () => <Ionicons name="ios-home" size={24} />
+        }
+    },
+    SettingsScreen: {
+        screen: SettingsScreen,
+        navigationOptions: {
+            title: 'Settings',
+            drawerIcon: () => <Ionicons name="ios-settings" size={24} />
+        }
+    }
+}, {
+        contentComponent: CustomDrawerComponent
+    })
+
+const AppSwitchNavigator = createSwitchNavigator({
+    LoadingScreen,
+    LoginStackNavigator,
+    AppDrawerNavigator
+})
+
+
+const AppContainer = createAppContainer(AppSwitchNavigator)
+export default App
