@@ -9,6 +9,9 @@ import 'firebase/database';
 import { snapshotToArray } from '../helpers/firebaseHelpers';
 import ListItem from "../components/ListItem";
 import AddReportModal from "../components/AddReportModal";
+import {connect} from "react-redux";
+import store from "../redux/store";
+import reports from "../redux/reducers/reportsReducer";
 
 class HomeScreen extends React.Component {
 
@@ -35,11 +38,10 @@ class HomeScreen extends React.Component {
         const reports = await firebase.database().ref('reports').child(user.uid).once('value')
         const reportsArray = snapshotToArray(reports)
         this.setState({
-            currentUser: currentUserData.val(),
-            reports: reportsArray,
-            reportsNew: reportsArray.filter(report => !report.saved),
-            reportsSaved: reportsArray.filter(report => report.saved),
+            currentUser: currentUserData.val()
         })
+        this.props.loadReports(reportsArray.reverse())
+        console.log(this.props.reports)
     }
     openMenu = () => {
         this.navigation.openDrawer()
@@ -57,12 +59,8 @@ class HomeScreen extends React.Component {
 
                 const response = await firebase.database().ref('reports').child(this.state.currentUser.uid).child(key)
                     .set(report)
-                this.setState((state, props) => ({
-                    reports: [...state.reports, report],
-                    reportsNew: [...state.reportsNew, report],
-                }), () => { })
-                console.log(this.state.reports)
-                // setModalOpen(false)
+                report.key = key
+                this.props.addReport(report)
             //}
         } catch (error) {
             console.log(error)
@@ -84,6 +82,7 @@ class HomeScreen extends React.Component {
                 reportsNew,
                 reportsSaved: [...prevState.reportsSaved, { name: selectReport.name, saved: true }]
             }))
+            this.props.markReportAsSaved(selectReport)
         } catch (error) {
             console.log(error)
         }
@@ -120,7 +119,7 @@ class HomeScreen extends React.Component {
 
                 <View style={styles.container}>
                     <FlatList
-                        data={this.state.reports}
+                        data={this.props.reports.reports}
                         renderItem={({ item }, index) => this.renderItem(item, index)}
                         keyExtractor={(item, index) => index.toString()}
                         ListEmptyComponent={
@@ -218,4 +217,19 @@ const styles = StyleSheet.create({
         color: colors.logoColor
     }
 });
-export default HomeScreen
+
+const mapStateToProps = state => {
+    return {
+        reports: state.reports
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        loadReports: reports => dispatch({type:'LOAD_REPORTS_FROM_SERVER', payload: reports}),
+        addReport: report => dispatch({type:'ADD_REPORT', payload: report}),
+        markReportAsSaved: report => dispatch({type:'MARK_REPORT_AS_SAVED', payload: report})
+    }
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(HomeScreen)

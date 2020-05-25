@@ -19,7 +19,8 @@ import * as Font from 'expo-font';
 import ReportsReadScreen from "./screens/HomeTabNavigator/ReportsReadScreen";
 import ReportsReadingScreen from "./screens/HomeTabNavigator/ReportsReadingScreen";
 import AddReportModal from "./components/AddReportModal";
-
+import {Provider} from "react-redux";
+import store from "./redux/store/index";
 
 
 class App extends React.Component {
@@ -33,7 +34,9 @@ class App extends React.Component {
     }
     render() {
         return (
-            <AppContainer />
+            <Provider store={store}>
+                <AppContainer />
+            </Provider>
         )
     }
 }
