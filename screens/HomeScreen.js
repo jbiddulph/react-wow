@@ -1,17 +1,23 @@
 import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, TextInput, FlatList, Alert, Image } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, TextInput, FlatList, Alert, Image, ActivityIndicator } from 'react-native';
 import ReportCount from '../components/ReportCount';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import CustomActionButton from '../components/CustomActionButton';
 import colors from '../assets/colors';
 import * as firebase from 'firebase/app';
+import 'firebase/storage';
 import 'firebase/database';
 import { snapshotToArray } from '../helpers/firebaseHelpers';
 import ListItem from "../components/ListItem";
 import AddReportModal from "../components/AddReportModal";
 import {connect} from "react-redux";
+import {compose} from 'redux';
+import {connectActionSheet} from "@expo/react-native-action-sheet";
 import store from "../redux/store";
 import reports from "../redux/reducers/reportsReducer";
+import ListEmptyComponent from "../components/ListEmptyComponent";
+import Swipeout from "react-native-swipeout";
+import * as ImageHelpers from '../helpers/ImageHelpers';
 
 class HomeScreen extends React.Component {
 
@@ -24,8 +30,8 @@ class HomeScreen extends React.Component {
             readCount: 0,
             textInputData: '',
             reports: [],
-            reportsNew: [],
-            reportsSaved: [],
+            reportsReading: [],
+            reportsRead: [],
             reportData: {
                 author: ''
             }
@@ -41,7 +47,7 @@ class HomeScreen extends React.Component {
             currentUser: currentUserData.val()
         })
         this.props.loadReports(reportsArray.reverse())
-        console.log(this.props.reports)
+        this.props.toggleIsLoadingReports(false)
     }
     openMenu = () => {
         this.navigation.openDrawer()
@@ -54,6 +60,7 @@ class HomeScreen extends React.Component {
             // if (snapshot.exists()) {
             //     alert('Unable to add report as already exists')
             // } else {
+                this.props.toggleIsLoadingReports(true)
                 const key = await firebase.database().ref('reports').child
                     (this.state.currentUser.uid).push().key
 
@@ -61,13 +68,16 @@ class HomeScreen extends React.Component {
                     .set(report)
                 report.key = key
                 this.props.addReport(report)
+            this.props.toggleIsLoadingReports(false)
             //}
         } catch (error) {
             console.log(error)
+            this.props.toggleIsLoadingReports(false)
         }
     }
     markAsRead = async (selectReport, index) => {
         try {
+            this.props.toggleIsLoadingReports(true)
             await firebase.database().ref('reports').child(this.state.currentUser.uid).child(selectReport.key).update({ saved: true })
             let reports = this.state.reports.map(report => {
                 if (report.name == selectReport.name) {
@@ -75,38 +85,152 @@ class HomeScreen extends React.Component {
                 }
                 return report
             })
-            let reportsNew = this.state.reportsNew.filter(report => report.name !== selectReport.name)
+            let reportsReading = this.state.reportsReading.filter(report => report.name !== selectReport.name)
 
-            this.setState(prevState => ({
-                reports,
-                reportsNew,
-                reportsSaved: [...prevState.reportsSaved, { name: selectReport.name, saved: true }]
-            }))
+            // this.setState(prevState => ({
+            //     reports,
+            //     reportsReading,
+            //     reportsRead: [...prevState.reportsRead, { name: selectReport.name, saved: true }]
+            // }))
             this.props.markReportAsSaved(selectReport)
+            this.props.toggleIsLoadingReports(false)
+        } catch (error) {
+            console.log(error)
+            this.props.toggleIsLoadingReports(false)
+        }
+    }
+
+    markAsUnread = async(selectReport,index) => {
+        try {
+            this.props.toggleIsLoadingReports(true)
+            await firebase.database().ref('reports').child(this.state.currentUser.uid).child(selectReport.key).update({ saved: false })
+
+            this.props.markReportAsUnsaved(selectReport)
+            this.props.toggleIsLoadingReports(false)
+        } catch (error) {
+            console.log(error)
+            this.props.toggleIsLoadingReports(false)
+        }
+    }
+
+    deleteReport = async(selectReport,index) => {
+        try{
+            this.props.toggleIsLoadingReports(true)
+            await firebase.database().ref('reports').child(this.state.currentUser.uid).child(selectReport.key).remove()
+            this.props.deleteReport(selectReport)
+            this.props.toggleIsLoadingReports(false)
+        }catch (error) {
+            console.log(error)
+            this.props.toggleIsLoadingReports(false)
+        }
+    }
+
+    uploadImage = async(image, selectReport) => {
+        const ref = firebase.storage().ref('reports').child(this.state.curretUser.uid).child(selectReport.key)
+        try {
+            // converting to blob
+            const blob = await ImageHelpers.prepareBlob(image.uri)
+            const snapshot = await ref.put(blob)
+
+            let downloadUrl = await ref.getDownloadURL()
+            await firebase.database().ref('reports').child(this.state.currentUser.uid).child(selectReport.key).update({image:downloadUrl})
+            blob.close()
+            return downloadUrl
         } catch (error) {
             console.log(error)
         }
     }
-    renderItem = (item, index) => (
-        <ListItem item={item}>
-            {item.saved ? (
-                <Ionicons name="ios-checkmark" color={colors.logoColor} size={30} />
-            ) : (
-                    <CustomActionButton style={styles.markAsReadButton} onPress={() => this.markAsRead(item, index)}>
-                        <Text style={styles.markAsReadButtonText}>Mark as read</Text>
-                    </CustomActionButton>
-                )}
-        </ListItem>
-        // <View style={styles.listItemContainer}>
-        //     <View style={styles.imageContainer}>
-        //         <Image source={require('../assets/icon.png')} style={styles.image}/>
-        //     </View>
-        //     <View style={styles.listItemTitleContainer}>
-        //         <Text style={styles.listItemTitle}>{item.name}</Text>
-        //     </View>
 
-        // </View>
-    )
+    openImageLibrary = async(selectReport) => {
+        const result = await ImageHelpers.openImageLibrary()
+        if(result){
+            this.props.toggleIsLoadingReports(true)
+            const downloadUrl = await this.uploadImage(result,selectReport)
+            this.props.toggleIsLoadingReports(false)
+        }
+    }
+
+    openCamera = async(selectReport) => {
+        const result = await ImageHelpers.openCamera()
+        if(result){
+            alert('Image clicked successfully')
+        }
+    }
+
+    addReportImage = (selectReport) => {
+        const options = ['Select from Photos', 'Camera', 'Cancel']
+        const cancelButtonIndex = 2;
+
+        this.props.showActionSheetWithOptions(
+            {
+                options,
+                cancelButtonIndex
+            },
+            buttonIndex => {
+                if (buttonIndex == 0)
+                {
+                    this.openImageLibrary(selectReport)
+                } else if(buttonIndex == 1)
+                {
+                    this.openCamera(selectReport)
+                }
+
+            },
+        )
+    }
+
+    renderItem = (item, index) => {
+        let swipeoutButtons = [
+                {
+                    text: 'Delete',
+                    component: (
+                        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                            <Ionicons name="ios-trash" size={24} color={colors.txtWhite}/>
+                        </View>
+                    ),
+                    backgroundColor: colors.bgDelete,
+                    onPress: () => this.deleteReport(item,index)
+                }
+            ]
+            if(!item.saved)
+            {
+                swipeoutButtons.unshift({
+                    text: 'Save',
+                    component: (
+                        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                            <Text style={{color: colors.txtWhite}}>Save</Text>
+                        </View>
+                    ),
+                    backgroundColor: colors.bgSuccessDark,
+                    onPress: () => this.markAsRead(item,index)
+                })
+            } else {
+                swipeoutButtons.unshift({
+                    text: 'Unsave',
+                    component: (
+                        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                            <Text style={{color: colors.txtWhite}}>Unsave</Text>
+                        </View>
+                    ),
+                    backgroundColor: colors.bgUnsave,
+                    onPress: () => this.markAsUnread(item,index)
+                })
+            }
+            return (
+                <Swipeout
+                    autoClose={true}
+                    style={{marginHorizontal: 5, marginVertical: 5}}
+                    backgroundColor={colors.bgMain}
+                    right={swipeoutButtons}
+                >
+                    <ListItem onPress={() => this.addReportImage(item)} editable={true} marginVertical={0} item={item}>
+                        {item.saved && (
+                            <Ionicons style={{marginRight: 5}} name="ios-heart" color={colors.logoColor} size={30}/>
+                        )}
+                    </ListItem>
+                </Swipeout>
+            )
+    }
     render() {
         return (
             <View style={styles.container}>
@@ -116,23 +240,30 @@ class HomeScreen extends React.Component {
                 {/*    <Text style={styles.headerTitle}>Watch Out Worthing</Text>*/}
                 {/*    */}
                 {/*</View>*/}
-
+                <AddReportModal
+                    addReport={this.addReport}
+                />
                 <View style={styles.container}>
+                    {this.props.reports.isLoadingReports && (
+                        <View style={{...StyleSheet.absoluteFill,align:'center',justifyContent:'center',zIndex: 1000, elevation: 1000 }}>
+                            <ActivityIndicator size="large" color={colors.logoColor}/>
+                        </View>
+                    )}
                     <FlatList
                         data={this.props.reports.reports}
                         renderItem={({ item }, index) => this.renderItem(item, index)}
                         keyExtractor={(item, index) => index.toString()}
                         ListEmptyComponent={
-                            <View style={styles.listEmptyComponent}>
-                                <Text style={styles.listEmptyComponentTitle}>There are currently no reports</Text>
-                            </View>
+                            !this.props.reports.isLoadingReports && (
+                                <ListEmptyComponent text="There are no reports yet"/>
+                            )
                         }
                     />
                 </View>
                 {/*<View style={styles.footer}>*/}
                 {/*    <ReportCount title='Total' icon='ios-archive' count={this.state.reports.length} />*/}
-                {/*    <ReportCount title='New' icon='ios-document' count={this.state.reportsNew.length} />*/}
-                {/*    <ReportCount title='Saved' icon='ios-heart' count={this.state.reportsSaved.length} />*/}
+                {/*    <ReportCount title='New' icon='ios-document' count={this.state.reportsReading.length} />*/}
+                {/*    <ReportCount title='Saved' icon='ios-heart' count={this.state.reportsRead.length} />*/}
                 {/*</View>*/}
                 <SafeAreaView />
             </View>
@@ -228,8 +359,16 @@ const mapDispatchToProps = dispatch => {
     return {
         loadReports: reports => dispatch({type:'LOAD_REPORTS_FROM_SERVER', payload: reports}),
         addReport: report => dispatch({type:'ADD_REPORT', payload: report}),
-        markReportAsSaved: report => dispatch({type:'MARK_REPORT_AS_SAVED', payload: report})
+        markReportAsSaved: report => dispatch({type:'MARK_REPORT_AS_SAVED', payload: report}),
+        markReportAsUnsaved: report => dispatch({type:'MARK_REPORT_AS_UNSAVED', payload: report}),
+        toggleIsLoadingReports: bool => dispatch({type:'TOGGLE_IS_LOADING_REPORTS', payload: bool}),
+        deleteReport: report => dispatch({type:'DELETE_REPORT', payload: report})
     }
 }
 
-export default connect(mapStateToProps,mapDispatchToProps)(HomeScreen)
+const wrapper = compose(
+    connect(mapStateToProps,mapDispatchToProps),
+    connectActionSheet
+)
+
+export default wrapper(HomeScreen)

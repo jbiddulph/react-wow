@@ -5,6 +5,7 @@ import {
     createStackNavigator,
     createDrawerNavigator,
     createBottomTabNavigator} from 'react-navigation';
+import {ActionSheetProvider} from '@expo/react-native-action-sheet';
 import WelcomeScreen from './screens/AppSwitchNavigator/WelcomeScreen';
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
@@ -21,6 +22,7 @@ import ReportsReadingScreen from "./screens/HomeTabNavigator/ReportsReadingScree
 import AddReportModal from "./components/AddReportModal";
 import {Provider} from "react-redux";
 import store from "./redux/store/index";
+import ReportsCountContainer from "./redux/containers/ReportsCountContainer";
 
 
 class App extends React.Component {
@@ -35,7 +37,9 @@ class App extends React.Component {
     render() {
         return (
             <Provider store={store}>
-                <AppContainer />
+                <ActionSheetProvider>
+                    <AppContainer />
+                </ActionSheetProvider>
             </Provider>
         )
     }
@@ -65,19 +69,23 @@ const HomeTabNavigator = createBottomTabNavigator({
     HomeScreen: {
         screen: HomeScreen,
         navigationOptions: {
-            tabBarLabel: 'Total Reports'
+            tabBarLabel: 'Total Reports',
+            tabBarIcon: ({tintColor}) => <ReportsCountContainer color={tintColor} type="reports"/>
         }
     },
     ReportsReadingScreen: {
         screen: ReportsReadingScreen,
         navigationOptions: {
-            tabBarLabel: 'Reports Reading'
+            tabBarLabel: 'New Reports',
+            tabBarIcon: ({tintColor}) => <ReportsCountContainer color={tintColor} type="reportsReading"/>
+
         }
     },
     ReportsReadScreen: {
         screen: ReportsReadScreen,
         navigationOptions: {
-            tabBarLabel: 'Reports Read'
+            tabBarLabel: 'Reports Saved',
+            tabBarIcon: ({tintColor}) => <ReportsCountContainer color={tintColor} type="reportsRead"/>
         }
     }
 },{
@@ -100,11 +108,11 @@ HomeTabNavigator.navigationOptions = ({navigation}) => {
             }
         case 'ReportsReadingScreen':
             return{
-                headerTitle: 'Reading Reports'
+                headerTitle: 'New Reports'
             }
         case 'ReportsReadScreen':
             return{
-                headerTitle: 'Read Reports'
+                headerTitle: 'Saved Reports'
             }
         default:
             return{
@@ -124,11 +132,6 @@ const HomeStackNavigator = createStackNavigator({
                     color={colors.logoColor}
                     onPress={()=>navigation.openDrawer()}
                     style={{marginLeft: 20}}
-                    />
-                ),
-                headerRight: (
-                    <AddReportModal
-                        addReport={this.addReport}
                     />
                 )
             }

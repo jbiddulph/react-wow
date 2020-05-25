@@ -1,14 +1,18 @@
 import React from 'react';
-import {View, Text, StyleSheet, Image} from 'react-native';
+import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import colors from '../assets/colors';
 import CustomActionButton from './CustomActionButton';
 
-const ListItem = ({item, children}) => {
-        return (
-            <View style={styles.listItemContainer}>
+const ListItem = ({item, children, marginVertical, editable, onPress}) => (
+            <View style={[styles.listItemContainer, {marginVertical}]}>
                 <View style={styles.imageContainer}>
-                    <Image source={require('../assets/icon.png')} style={styles.image}/>
+                    <TouchableOpacity
+                        disabled={!editable}
+                        style={{flex:1}}
+                        onPress={()=>onPress(item)}>
+                        <Image source={require('../assets/icon.png')} style={styles.image}/>
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.listItemTitleContainer}>
                     <Text style={styles.listItemTitle}>{item.name}</Text>
@@ -16,8 +20,11 @@ const ListItem = ({item, children}) => {
                 {children}
             </View>
         )
-}
 
+ListItem.defaultProps = {
+    marginVertical: 5,
+    editable: false
+}
 export default ListItem;
 
 const styles = StyleSheet.create({
@@ -25,8 +32,7 @@ const styles = StyleSheet.create({
         minHeight:100,
         flexDirection: 'row',
         backgroundColor: colors.listItemBg,
-        alignItems:'center',
-        marginVertical: 5
+        alignItems:'center'
     },
     listItemTitle: {
         fontWeight: '100',

@@ -16,9 +16,6 @@ export default class AddReportForm extends React.Component {
 
     constructor(props) {
         super(props);
-        state = {
-            errorMessage: ''
-        }
     }
 
     render() {
@@ -30,8 +27,8 @@ export default class AddReportForm extends React.Component {
                         initialValues={{ name: '', latitude: this.props.latitude, longitude: this.props.longitude, read: false, saved: false }}
                         validationSchema={reviewSchema}
                         onSubmit={(values, actions) => {
-                            actions.resetForm()
                             this.props.addReport(values)
+                            actions.resetForm()
                         }}
                     >
                         {(props) => (
