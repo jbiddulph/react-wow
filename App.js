@@ -23,6 +23,7 @@ import AddReportModal from "./components/AddReportModal";
 import {Provider} from "react-redux";
 import store from "./redux/store/index";
 import ReportsCountContainer from "./redux/containers/ReportsCountContainer";
+import ReportDetails from "./screens/AppSwitchNavigator/ReportDetails";
 
 
 class App extends React.Component {
@@ -44,6 +45,12 @@ class App extends React.Component {
         )
     }
 }
+
+const ListToDetails = createStackNavigator( {
+    ReportDetails: {
+        screen: ReportDetails,
+    }
+})
 
 const LoginStackNavigator = createStackNavigator({
     WelcomeScreen: {
@@ -171,6 +178,7 @@ const AppDrawerNavigator = createDrawerNavigator({
 const AppSwitchNavigator = createSwitchNavigator({
     LoadingScreen,
     LoginStackNavigator,
+    ListToDetails,
     AppDrawerNavigator
 })
 

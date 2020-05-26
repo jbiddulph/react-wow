@@ -21,7 +21,7 @@ import * as ImageHelpers from '../helpers/ImageHelpers';
 
 class HomeScreen extends React.Component {
 
-    constructor() {
+    constructor({navigation}) {
         super()
         this.state = {
             currentUser: {},
@@ -86,12 +86,6 @@ class HomeScreen extends React.Component {
                 return report
             })
             let reportsReading = this.state.reportsReading.filter(report => report.name !== selectReport.name)
-
-            // this.setState(prevState => ({
-            //     reports,
-            //     reportsReading,
-            //     reportsRead: [...prevState.reportsRead, { name: selectReport.name, saved: true }]
-            // }))
             this.props.markReportAsSaved(selectReport)
             this.props.toggleIsLoadingReports(false)
         } catch (error) {
@@ -126,7 +120,7 @@ class HomeScreen extends React.Component {
     }
 
     uploadImage = async(image, selectReport) => {
-        const ref = firebase.storage().ref('reports').child(this.state.curretUser.uid).child(selectReport.key)
+        const ref = firebase.storage().ref('reports').child(this.state.currentUser.uid).child(selectReport.key)
         try {
             // converting to blob
             const blob = await ImageHelpers.prepareBlob(image.uri)
@@ -146,6 +140,7 @@ class HomeScreen extends React.Component {
         if(result){
             this.props.toggleIsLoadingReports(true)
             const downloadUrl = await this.uploadImage(result,selectReport)
+            this.props.updateReportImage({...selectReport,uri: downloadUrl})
             this.props.toggleIsLoadingReports(false)
         }
     }
@@ -153,7 +148,10 @@ class HomeScreen extends React.Component {
     openCamera = async(selectReport) => {
         const result = await ImageHelpers.openCamera()
         if(result){
-            alert('Image clicked successfully')
+            this.props.toggleIsLoadingReports(true)
+            const downloadUrl = await this.uploadImage(result,selectReport)
+            this.props.updateReportImage({...selectReport,uri: downloadUrl})
+            this.props.toggleIsLoadingReports(false)
         }
     }
 
@@ -362,7 +360,8 @@ const mapDispatchToProps = dispatch => {
         markReportAsSaved: report => dispatch({type:'MARK_REPORT_AS_SAVED', payload: report}),
         markReportAsUnsaved: report => dispatch({type:'MARK_REPORT_AS_UNSAVED', payload: report}),
         toggleIsLoadingReports: bool => dispatch({type:'TOGGLE_IS_LOADING_REPORTS', payload: bool}),
-        deleteReport: report => dispatch({type:'DELETE_REPORT', payload: report})
+        deleteReport: report => dispatch({type:'DELETE_REPORT', payload: report}),
+        updateReportImage: report => dispatch({type:'UPDATE_REPORT_IMAGE', payload: report})
     }
 }
 

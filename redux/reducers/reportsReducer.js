@@ -2,7 +2,8 @@ const initialState ={
     reports: [],
     reportsReading: [],
     reportsRead: [],
-    isLoadingReports: true
+    isLoadingReports: true,
+    image: null
 }
 
 const reports = (state=initialState, action) => {
@@ -59,7 +60,27 @@ const reports = (state=initialState, action) => {
                 reportsReading: state.reportsReading.filter(report => report.name !== action.payload.name),
                 reportsRead: state.reportsRead.filter(report => report.name !== action.payload.name),
             }
-
+        case 'UPDATE_REPORTY_IMAGE':
+            return {
+                reports: state.reports.map(report => {
+                    if(report.name == action.payload.name){
+                        return {...report, image:action.payload.uri}
+                    }
+                    return report
+                }),
+                reportsReading: state.reportsReading.map(report => {
+                    if(report.name == action.payload.name){
+                        return {...report, image:action.payload.uri}
+                    }
+                    return report
+                }),
+                reportsRead: state.reportsRead.map(report => {
+                    if(report.name == action.payload.name){
+                        return {...report, image:action.payload.uri}
+                    }
+                    return report
+                }),
+            }
         default:
             return state;
     }
