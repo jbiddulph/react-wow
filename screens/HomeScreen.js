@@ -21,8 +21,8 @@ import * as ImageHelpers from '../helpers/ImageHelpers';
 
 class HomeScreen extends React.Component {
 
-    constructor({navigation}) {
-        super()
+    constructor(props) {
+        super(props)
         this.state = {
             currentUser: {},
             totalCount: 0,
@@ -37,9 +37,10 @@ class HomeScreen extends React.Component {
             }
         }
     }
+
     componentDidMount = async () => {
-        const { navigation } = this.props
-        const user = navigation.getParam('user')
+
+        const user = this.props.currentUser
         const currentUserData = await firebase.database().ref('users').child(user.uid).once('value')
         const reports = await firebase.database().ref('reports').child(user.uid).once('value')
         const reportsArray = snapshotToArray(reports)
@@ -221,7 +222,7 @@ class HomeScreen extends React.Component {
                     backgroundColor={colors.bgMain}
                     right={swipeoutButtons}
                 >
-                    <ListItem onPress={() => this.addReportImage(item)} editable={true} marginVertical={0} item={item}>
+                    <ListItem onPress={() => this.addReportImage(item)} editable={true} marginVertical={0} item={item} navigation={this.props.navigation}>
                         {item.saved && (
                             <Ionicons style={{marginRight: 5}} name="ios-heart" color={colors.logoColor} size={30}/>
                         )}
@@ -349,7 +350,8 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => {
     return {
-        reports: state.reports
+        reports: state.reports,
+        currentUser: state.auth.currentUser
     }
 }
 

@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {View, Text, StyleSheet, ScrollView, SafeAreaView, Platform} from 'react-native';
 import colors from "../../assets/colors";
 import {Ionicons} from "@expo/vector-icons"
+import {DrawerItemList} from "@react-navigation/drawer";
 import {DrawerItems} from "react-navigation";
 
 class CustomDrawerComponent extends Component {
@@ -13,7 +14,7 @@ class CustomDrawerComponent extends Component {
                     <Ionicons name="ios-ice-cream" size={100} color={colors.logoColor} />
                     <Text style={{fontSize:24, color: 'white', fontWeight: '100'}}>Watch Out Worthing</Text>
                 </View>
-                <DrawerItems {...this.props}/>
+                <DrawerItemList {...this.props}/>
             </ScrollView>
         );
     }

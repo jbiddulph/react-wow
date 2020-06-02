@@ -7,10 +7,12 @@ import NetworkImage from 'react-native-image-progress'
 // import * as Progress from 'react-native-progress/Circle';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
 
-const ListItem = ({item, children, marginVertical, editable, onPress}) => (
+// const navigation = {navigation}
+
+const ListItem = ({item, children, marginVertical, editable, onPress, navigate}) => (
         <TouchableOpacity
             style={{flex:1}}
-            onPress={()=> navigation.push('ReportDetails', item)}
+            onPress={()=> this.props.navigation.navigate('ReportDetails', item)}
             >
             <View style={[styles.listItemContainer, {marginVertical}]}>
                 <View style={styles.imageContainer}>
