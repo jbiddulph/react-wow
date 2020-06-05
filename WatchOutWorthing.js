@@ -144,8 +144,8 @@ const HomeStackNavigator = ({navigation}) => (
         screenOptions={{
             headerStyle: {backgroundColor: colors.bgMain},
             headerTintColor: 'white',
-            headerLeft: () => (
-                <Ionicons onPress={()=>navigation.openDrawer()} name="ios-menu" size={30} color="white"  style={{marginLeft:10}}/>
+            headerRight: () => (
+                <Ionicons onPress={()=>navigation.openDrawer()} name="ios-menu" size={30} color="white"  style={{marginRight:20}}/>
             )
 
         }}
