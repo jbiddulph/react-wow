@@ -1,4 +1,4 @@
-# react-wow
+# react-wow (Watch Out Worthing v2)
 
 
 clone the repo
