@@ -23,6 +23,7 @@ import {ActionSheetProvider} from "@expo/react-native-action-sheet";
 import ReportsCountContainer from "./redux/containers/ReportsCountContainer";
 import {Ionicons} from '@expo/vector-icons';
 
+
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
@@ -32,10 +33,12 @@ class WatchOutWorthing extends Component {
 
     constructor(props) {
         super(props);
+
     }
 
     componentDidMount() {
         this.checkIfLoggedIn()
+        console.log('THIS PROPS: ',this.props)
     }
 
     checkIfLoggedIn = () => {
@@ -58,7 +61,8 @@ class WatchOutWorthing extends Component {
         }
     }
 
-    render() {
+    render(props) {
+        const { navigation } = this.props;
         if(this.props.auth.isLoading)
         {
             return <SplashScreen/>
@@ -75,10 +79,10 @@ class WatchOutWorthing extends Component {
                             },
                             headerTintColor: "white"
                         }}
+                    {...props} navigation={navigation}
                 >
-                    <Stack.Screen name="WelcomeScreen" options={{headerShown: false}} component={WelcomeScreen} />
+                    <Stack.Screen name="WelcomeScreen" options={{headerShown: false}} component={WelcomeScreen}  />
                     <Stack.Screen name="LoginScreen" options={{backTitleVisible: false}} component={LoginScreen} />
-                    <Stack.Screen name="ReportDetails" component={ReportDetails}  />
                 </Stack.Navigator>
                 ):(
                     <ActionSheetProvider>
@@ -91,6 +95,7 @@ class WatchOutWorthing extends Component {
 }
 
 const HomeTabNavigator = () => (
+
     <Tab.Navigator
         tabBarOptions={{
             style: {
@@ -134,13 +139,15 @@ const getHeaderTitle = route => {
 }
 
 const HomeStackNavigator = ({navigation}) => (
+
     <Stack.Navigator
         screenOptions={{
             headerStyle: {backgroundColor: colors.bgMain},
             headerTintColor: 'white',
-            headerLeft: ()=> (
+            headerLeft: () => (
                 <Ionicons onPress={()=>navigation.openDrawer()} name="ios-menu" size={30} color="white"  style={{marginLeft:10}}/>
             )
+
         }}
     >
         <Stack.Screen
@@ -149,11 +156,22 @@ const HomeStackNavigator = ({navigation}) => (
             })}
             name="Home"
             component={HomeTabNavigator}
+            navigationOptions={navigation}
+        />
+
+        <Stack.Screen
+            options={({route}) => ({
+                title:getHeaderTitle(route)
+            })}
+            name="ReportDetails"
+            component={ReportDetails}
+            navigationOptions={navigation}
+            navigation={navigation}
         />
     </Stack.Navigator>
 )
 
-const AppDrawerNavigator = () => (
+const AppDrawerNavigator = ({navigation}) => (
     <Drawer.Navigator
         drawerContent={props => <CustomDrawerComponent {...props}/>}
     >

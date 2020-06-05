@@ -22,8 +22,8 @@ import WatchOutWorthing from "./WatchOutWorthing";
 
 class App extends React.Component {
     
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.initializeFirebase()
     }
     initializeFirebase = () => {

@@ -8,8 +8,8 @@ import 'firebase/database'
 import {connect} from 'react-redux'
 
 class LoginScreen extends Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             email: '',
             password: '',

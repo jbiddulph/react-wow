@@ -9,9 +9,14 @@ class ReportDetails extends Component {
         super(props);
     }
     render() {
+        const navigation = this.props.route.params
+        // console.log('This is the Lat: ',this.props.route.params.params.report.latitude)
+        console.log('This is the Navigation: ',navigation)
+
         return (
+
             <View style={globalStyles.container}>
-                <Text>{navigation.getParam('name') }</Text>
+                <Text>{this.props.route.params.name}</Text>
             </View>
         );
     }

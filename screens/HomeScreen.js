@@ -18,6 +18,8 @@ import reports from "../redux/reducers/reportsReducer";
 import ListEmptyComponent from "../components/ListEmptyComponent";
 import Swipeout from "react-native-swipeout";
 import * as ImageHelpers from '../helpers/ImageHelpers';
+import { useNavigation } from '@react-navigation/native';
+
 
 class HomeScreen extends React.Component {
 
@@ -120,6 +122,18 @@ class HomeScreen extends React.Component {
         }
     }
 
+    viewReport = async(selectReport,index) => {
+        const navigation = this.props.navigation;
+        try{
+            this.props.toggleIsLoadingReports(true)
+            navigation.navigate('ReportDetails', { screen: 'ReportDetails', params: { report: selectReport } })
+            this.props.toggleIsLoadingReports(false)
+        }catch (error) {
+            console.log(error)
+            this.props.toggleIsLoadingReports(false)
+        }
+    }
+
     uploadImage = async(image, selectReport) => {
         const ref = firebase.storage().ref('reports').child(this.state.currentUser.uid).child(selectReport.key)
         try {
@@ -177,6 +191,7 @@ class HomeScreen extends React.Component {
             },
         )
     }
+
 
     renderItem = (item, index) => {
         let swipeoutButtons = [
